@@ -4,6 +4,9 @@ Este é um projeto de front-end desenvolvido com React, TypeScript e Vite. A apl
 
 ## Tecnologias Utilizadas
 
+
+-- Back do bot -> [https://github.com/SpatenRaivoso/agentIa](https://github.com/SpatenRaivoso/agentIa)
+
 - **React**: Biblioteca para construção da interface do usuário.
 - **TypeScript**: Superset do JavaScript que adiciona tipagem estática.
 - **Vite**: Ferramenta de build rápida para desenvolvimento moderno.
