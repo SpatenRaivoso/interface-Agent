@@ -1,118 +1,110 @@
 import { useEffect, useState } from "react";
 import api from "../../BaseUrl/url";
 import Chat from "../../components/Chat";
+import Modal from "../../components/Modal";
 
 interface Conversation {
-    id: number;
-    conversation_id: string;
-    role: "USER" | "AGENT";
-    content: string;
-    sector?: string;
-    summary?: string;
-    created_at: string;
+  id: number;
+  conversation_id: string;
+  role: "USER" | "AGENT";
+  content: string;
+  sector?: string;
+  summary?: string;
+  created_at: string;
 }
 
+export type ModalType = "LIST" | "DETAIL" | null;
+
 export default function Home() {
-    const [conversations, setConversations] = useState<Conversation[][]>([]);
-    const [userModal, setUserModal] = useState(false);
-    const [selectedConversation, setSelectedConversation] = useState<Conversation[] | null>(null);
-    const [conversationModal, setConversationModal] = useState(false);
+  const [conversations, setConversations] = useState<Conversation[][]>([]);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation[] | null>(null);
 
-    useEffect(() => {
-        async function fetchMessages() {
-            try {
-                const response = await api.get("/messages");
-                setConversations(response.data);
-            } catch (error) {
-                console.error("Erro ao buscar mensagens:", error);
-            }
-        }
+  useEffect(() => {
+    api.get("/messages")
+      .then(res => setConversations(res.data))
+      .catch(err => console.error("Erro ao buscar mensagens:", err));
+  }, []);
 
-        fetchMessages();
-    }, []);
 
-    return (
-        <div className="p-6">
-            <button
-                onClick={() => setUserModal(true)}
-                className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+  const openConversation = (conv: Conversation[]) => {
+    setSelectedConversation(conv);
+    setActiveModal("DETAIL");
+  };
+
+  const closeModals = () => {
+    setActiveModal(null);
+    setSelectedConversation(null);
+  };
+
+  return (
+    <div className="p-6">
+      <button
+        onClick={() => setActiveModal("LIST")}
+        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+      >
+        Historico de Conversas
+      </button>
+
+      {activeModal === "LIST" && (
+        <Modal title="Histórico" onClose={closeModals}>
+          {conversations.map((conv, i) => (
+            <div
+              key={i}
+              onClick={() => openConversation(conv)}
+              className="border rounded-lg p-2 bg-gray-50 cursor-pointer hover:bg-gray-100"
             >
-                Abrir mensagens
-            </button>
+              <h3 className="font-medium text-sm mb-1">Conversa {i + 1}</h3>
 
-            {userModal && (
-                <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
-                    <div className="bg-white w-96 max-h-[80vh] rounded-xl p-4 flex flex-col">
+              {conv.slice(0, 3).map(msg => (
+                <MessageBubble key={msg.id} msg={msg} small />
+              ))}
 
-                        <div className="flex justify-between items-center mb-3">
-                            <h2 className="font-semibold">Histórico</h2>
-                            <button
-                                onClick={() => setUserModal(false)}
-                                className="text-sm text-red-500"
-                            >
-                                Fechar
-                            </button>
-                        </div>
+              {conv.length > 3 && (
+                <span className="text-xs text-gray-500">
+                  ... e mais {conv.length - 3} mensagens
+                </span>
+              )}
+            </div>
+          ))}
+        </Modal>
+      )}
 
-                        <div className="flex-1 overflow-y-auto space-y-2">
-                            {conversations.map((conv, convIndex) => (
-                                <div 
-                                    key={convIndex} 
-                                    className="border rounded-lg p-2 bg-gray-50 cursor-pointer hover:bg-gray-100"
-                                    onClick={() => { setSelectedConversation(conv); setConversationModal(true); }}
-                                >
-                                    <h3 className="font-medium text-sm mb-1">Conversa {convIndex + 1}</h3>
-                                    <div className="space-y-1">
-                                        {conv.slice(0, 3).map(msg => (
-                                            <div
-                                                key={msg.id}
-                                                className={`p-1 rounded text-xs max-w-[80%] ${msg.role === "USER"
-                                                    ? "ml-auto bg-blue-600 text-white"
-                                                    : "mr-auto bg-gray-200 text-gray-800"
-                                                    }`}
-                                            >
-                                                {msg.content.length > 50 ? msg.content.substring(0, 50) + "..." : msg.content}
-                                            </div>
-                                        ))}
-                                        {conv.length > 3 && <div className="text-xs text-gray-500">... e mais {conv.length - 3} mensagens</div>}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {conversationModal && selectedConversation && (
-                <div className="fixed inset-0 bg-black/40 flex justify-center items-center">
-                    <div className="bg-white w-[600px] max-h-[80vh] rounded-xl p-4 flex flex-col">
-                        <div className="flex justify-between items-center mb-3">
-                            <h2 className="font-semibold">Conversa Detalhada</h2>
-                            <button
-                                onClick={() => setConversationModal(false)}
-                                className="text-sm text-red-500"
-                            >
-                                Fechar
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto space-y-2">
-                            {selectedConversation.map(msg => (
-                                <div
-                                    key={msg.id}
-                                    className={`p-2 rounded text-sm max-w-[75%] ${msg.role === "USER"
-                                        ? "ml-auto bg-blue-600 text-white"
-                                        : "mr-auto bg-gray-200 text-gray-800"
-                                        }`}
-                                >
-                                    {msg.content}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
+      {activeModal === "DETAIL" && selectedConversation && (
+        <Modal title="Conversa Detalhada" onClose={closeModals}>
+          {selectedConversation.map(msg => (
+            <MessageBubble key={msg.id} msg={msg} />
+          ))}
+        </Modal>
+      )}
 
-            <Chat />
-        </div>
-    );
+      <Chat />
+    </div>
+  );
+}
+
+
+function MessageBubble({
+  msg,
+  small = false
+}: {
+  msg: Conversation;
+  small?: boolean;
+}) {
+  return (
+    <div
+      className={`p-${small ? 1 : 2} rounded ${
+        small ? "text-xs" : "text-sm"
+      } max-w-[75%] ${
+        msg.role === "USER"
+          ? "ml-auto bg-blue-600 text-white"
+          : "mr-auto bg-gray-200 text-gray-800"
+      }`}
+    >
+      {small && msg.content.length > 50
+        ? msg.content.slice(0, 50) + "..."
+        : msg.content}
+    </div>
+  );
 }
