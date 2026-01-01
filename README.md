@@ -1,4 +1,4 @@
-# Front-end Chat Application
+# Front-end Chat Bot
 
 Este é um projeto de front-end desenvolvido com React, TypeScript e Vite. A aplicação permite interação com um chatbot e visualização do histórico de conversas.
 
