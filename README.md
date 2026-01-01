@@ -2,9 +2,6 @@
 
 Este é um projeto de front-end desenvolvido com React, TypeScript e Vite. A aplicação permite interação com um chatbot e visualização do histórico de conversas.
 
-## Tecnologias Utilizadas
-
-
 -- Back do bot -> [https://github.com/SpatenRaivoso/agentIa](https://github.com/SpatenRaivoso/agentIa)
 
 ## Tecnologias Utilizadas
