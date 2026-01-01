@@ -59,5 +59,4 @@ Certifique-se de que o backend esteja rodando antes de usar a aplicação.
 
 - `npm run dev`: Inicia o servidor de desenvolvimento.
 - `npm run build`: Compila o projeto para produção.
-- `npm run lint`: Executa o linter para verificar o código.
-- `npm run preview`: Visualiza a build de produção localmente.
+
